@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pemrograman Berbasis Objek: JDBC & Integrasi OOP dengan Database</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        /* ==========================================================================
+           1. RESET & CORE SETTING (A4 LANDSCAPE RATIO OPTIMIZATION)
+           ========================================================================== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+
+        :root {
+            --primary: #0a2b3e;
+            --secondary: #2c7da0;
+            --accent: #f4b942;
+            --text-dark: #1e2f3a;
+            --bg-light: #f4f8fa;
+            --card-bg: #ffffff;
+            --code-bg: #1e2a32;
+            --border-color: #cbdde6;
+        }
+
+        body {
+            background: #cbd6dc;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            color: var(--text-dark);
+            overflow-x: hidden;
+        }
+
+        /* Container Pembungkus Slide */
+        .slide-container {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            padding: 30px;
+            align-items: center;
+        }
+
+        /* ==========================================================================
+           2. SLIDE STRUCTURE (16:9 RATIO ON A4 BOX MODEL)
+           ========================================================================== */
+        .slide {
+            background: var(--card-bg);
+            width: 297mm;  /* Standar Panjang A4 */
+            height: 210mm; /* Standar Lebar A4 */
+            padding: 2.2rem 2.8rem;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow: hidden;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+            border-radius: 16px;
+            page-break-after: always;
+            break-inside: avoid;
+        }
+
+        .slide-header {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 1rem;
+        }
+
+        .slide-body {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            gap: 0.8rem;
+            overflow: hidden; /* Mencegah slide meluber ke bawah */
+        }
+
+        .slide-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid var(--border-color);
+            padding-top: 0.6rem;
+            margin-top: 0.6rem;
+            font-size: 0.8rem;
+            color: #8ba3b2;
+        }
+
+        /* ==========================================================================
+           3. TYPOGRAPHY & COMPONENTS
+           ========================================================================== */
+        h1 {
+            font-size: 2.2rem;
+            color: var(--primary);
+            border-left: 8px solid var(--secondary);
+            padding-left: 1rem;
+            line-height: 1.2;
+            margin-bottom: 0.4rem;
+        }
+
+        h2 {
+            font-size: 1.4rem;
+            color: var(--secondary);
+            margin-top: 0.2rem;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.2rem;
+        }
+
+        h3 {
+            font-size: 1.15rem;
+            color: var(--primary);
+            margin-bottom: 0.3rem;
+        }
+
+        p, li {
+            font-size: 1rem;
+            color: var(--text-dark);
+            line-height: 1.5;
+        }
+
+        ul, ol {
+            padding-left: 1.5rem;
+        }
+
+        li {
+            margin-bottom: 0.25rem;
+        }
+
+        /* Badges & Notes */
+        .badge {
+            background: var(--secondary);
+            color: white;
+            padding: 0.3rem 1rem;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            align-self: flex-start;
+            margin-bottom: 0.5rem;
+        }
+
+        .note {
+            background: #eef4fc;
+            border-left: 5px solid var(--secondary);
+            padding: 0.8rem 1.2rem;
+            border-radius: 12px;
+            font-size: 0.95rem;
+        }
+
+        .analogi {
+            background: #fff9ed;
+            border-left: 5px solid var(--accent);
+            padding: 0.8rem 1.2rem;
+            border-radius: 12px;
+            font-size: 0.95rem;
+        }
+
+        /* Layout Grid */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            align-items: start;
+        }
+
+        /* Data Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0.5rem 0;
+            font-size: 0.9rem;
+        }
+
+        th {
+            background: var(--secondary);
+            color: white;
+            padding: 8px 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        td {
+            border: 1px solid var(--border-color);
+            padding: 8px 12px;
+            background: #fff;
+        }
+
+        tr:nth-child(even) td {
+            background: var(--bg-light);
+        }
+
+        /* Code Blocks Optimization */
+        pre {
+            background: var(--code-bg);
+            color: #e2f0fa;
+            padding: 0.8rem 1.2rem;
+            border-radius: 12px;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 0.5rem;
+            line-height: 1.4;
+            border: 1px solid #111a20;
+        }
+
+        code {
+            font-family: 'Consolas', 'Courier New', monospace;
+            background: #f0f4f8;
+            padding: 0.15rem 0.4rem;
+            border-radius: 6px;
+            color: #c44536;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+
+        pre code {
+            background: transparent;
+            color: inherit;
+            padding: 0;
+            font-size: inherit;
+        }
+
+        .diagram-box {
+            background: #fafcfd;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 0.8rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* ==========================================================================
+           4. PRINT HARDWARE PRESETS (STRICT A4 LANDSCAPE)
+           ========================================================================== */
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+                margin: 0;
+            }
+
+            .slide-container {
+                padding: 0;
+                gap: 0;
+            }
+
+            @page {
+                size: A4 landscape;
+                margin: 0; /* Menghilangkan header/footer bawaan browser Chrome/Edge */
+            }
+
+            .slide {
+                width: 297mm;
+                height: 210mm;
+                box-shadow: none;
+                border-radius: 0;
+                page-break-after: always;
+                page-break-inside: avoid;
+                break-inside: avoid;
+                padding: 20mm; /* Memberikan padding aman saat menyentuh margin printer */
+            }
+
+            pre {
+                background: #f4f7f9 !important;
+                color: #1a2a3a !important;
+                border: 1px solid #99b1bc !important;
+            }
+
+            pre code {
+                color: #1a2a3a !important;
+            }
+
+            td {
+                background: #ffffff !important;
+            }
+            
+            tr:nth-child(even) td {
+                background: #f4f7f9 !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="slide-container">
+
+    <div class="slide">
+        <div class="slide-header">
+            <div class="badge">Pemrograman Berbasis Objek | S1 Informatika</div>
+            <h1>🔌 Java Database Connectivity (JDBC)<br>Integrasi OOP dengan Database</h1>
+        </div>
+        <div class="slide-body" style="justify-content: center; gap: 1.5rem;">
+            <p style="font-size: 1.2rem;"><strong>Pertemuan:</strong> 3 × 50 menit | <strong>Target Mahasiswa:</strong> Semester 3–5</p>
+            <div class="note">
+                📌 <strong>Capaian Pembelajaran:</strong> Mahasiswa mampu menjelaskan fungsi JDBC, memahami arsitektur data berlapis, membuat koneksi ke MySQL, melakukan operasi CRUD, mengimplementasikan kelas Data Access Object (DAO), serta menerapkan prinsip SOLID dalam persistensi data objek.
+            </div>
+            <div class="grid-2">
+                <div>
+                    <h3>🎯 Prasyarat Materi</h3>
+                    <ul style="font-size: 0.95rem;">
+                        <li>Pemahaman Class & Object mendasar</li>
+                        <li>Prinsip Encapsulation & Inheritance</li>
+                        <li>Polymorphism & Implementation Interface</li>
+                        <li>Asas dasar SOLID Principle (khususnya SRP & DIP)</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3>🗂️ Struktur Pembahasan</h3>
+                    <ul style="font-size: 0.95rem;">
+                        <li>Kebutuhan Data Persistence & Arsitektur JDBC</li>
+                        <li>Eksplorasi Operasi CRUD & PreparedStatement Security</li>
+                        <li>Penerapan Desain Pola DAO (Data Access Object)</li>
+                        <li>Bedah Struktur Mini Project & Best Practices</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="slide-footer">
+            <span>Metode: Konsep → Analogi → Diagram → Kode → Latihan → Proyek</span>
+            <span>Slide 1</span>
+        </div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-header">
+            <div class="badge">BAB 1: Kebutuhan Data Persistence</div>
+            <h1>📁 Mengapa Aplikasi Membutuhkan Database?</h1>
+        </div>
+        <div class="slide-body">
+            <div class="analogi">
+                🧠 <strong>Studi Kasus: Sistem Manajemen Mahasiswa</strong><br>
+                Bayangkan Anda memasukkan 100 data mahasiswa baru ke dalam aplikasi. Tiba-tiba listrik padam atau aplikasi sengaja ditutup. Apa yang terjadi pada data tersebut jika hanya mengandalkan variabel lokal di dalam memori utama?
+            </div>
+            
+            <h3>⚠️ Keterbatasan Penyimpanan RAM (ArrayList / Collection)</h3>
+            <ul>
+                <li><strong>Volatile:</strong> Seluruh data langsung terhapus dari memori begitu proses Java Virtual Machine (JVM) berhenti.</li>
+                <li><strong>Isolasi Data:</strong> Data internal aplikasi tidak dapat diakses atau dibagikan ke aplikasi lain secara aman.</li>
+                <li><strong>Skalabilitas & Query:</strong> Melakukan penyaringan (filter) atau pengurutan (sorting) data dalam jumlah besar secara manual memakan resource komputasi yang tinggi.</li>
+            </ul>
+
+            <h3>📊 Komparasi Efisiensi: ArrayList vs Database Relasional</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Kriteria Penilaian</th>
+                        <th>Struktur Data Ragam ArrayList (RAM)</th>
+                        <th>Sistem Database Relasional (Disk)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Sifat Persistensi</strong></td>
+                        <td>Sifat sementara (Akan hilang saat program mati)</td>
+                        <td>Permanen tersimpan aman di dalam Media Harddisk/SSD</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Kompleksitas Pencarian</strong></td>
+                        <td>Linear Search berbiaya besar $O(n)$</td>
+                        <td>Pencarian optimal berbasis terindeks struktur B-Tree / SQL</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Integritas Aturan</strong></td>
+                        <td>Tidak memiliki mekanisme validasi aturan baku</td>
+                        <td>Ketat (Mendukung validasi Primary Key & Foreign Key)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Akses Konkurensi</strong></td>
+                        <td>Terbatas hanya untuk satu pengguna aktif aplikasi</td>
+                        <td>Mendukung Multi-user secara serempak (*Concurrent Access*)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="slide-footer">
+            <span>Fokus Utama: Memahami arti pentingnya mekanisme Persistence Data</span>
+            <span>Slide 2</span>
+        </div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-header">
+            <div class="badge">BAB 2: Definisi & Komponen JDBC</div>
+            <h1>🚗 Apa Itu JDBC?</h1>
+        </div>
+        <div class="slide-body">
+            <div class="analogi">
+                📢 <strong>Analogi Transportasi Driver & Penumpang:</strong><br>
+                👨‍💻 <strong>Java Application:</strong> Bertindak sebagai Penumpang yang membawa barang (data) dan tahu tempat yang ingin dituju.<br>
+                🛵 <strong>JDBC Driver:</strong> Bertindak sebagai Sopir Ojek/Taksi yang mengerti rute teknis jalan raya menuju lokasi tujuan.<br>
+                🏢 <strong>Database Server:</strong> Lokasi Tujuan Akhir tempat data diturunkan, disimpan, atau dijemput kembali.
+            </div>
+            
+            <p><strong>JDBC (Java Database Connectivity)</strong> adalah bagian dari spesifikasi standar Java SE berupa sekumpulan API (Application Programming Interface) yang menyediakan standardisasi interaksi aplikasi Java dengan mesin basis data relasional menggunakan bahasa query SQL.</p>
+            
+            <div class="grid-2">
+                <div class="diagram-box" style="height: 180px;">
+                    <div class="mermaid">
+                        graph LR
+                            App[Aplikasi Java] --> API[JDBC API]
+                            API --> Mgr[Driver Manager]
+                            Mgr --> Driver[Driver MySQL]
+                            Driver --> DB[(MySQL DB)]
+                    </div>
+                </div>
+                <div>
+                    <h3>🧩 4 Komponen Utama Abstraksi JDBC:</h3>
+                    <ul style="font-size: 0.9rem;">
+                        <li><code>Driver</code>: Pustaka pihak ketiga (*vendor-specific*) penghubung komunikasi protokol DB (ex: Connector/J).</li>
+                        <li><code>Connection</code>: Representasi sesi jalur komunikasi aktif tatap muka dengan database.</li>
+                        <li><code>Statement</code>: Wahana penampung eksekusi skrip SQL mentah menuju database.</li>
+                        <li><code>ResultSet</code>: Struktur data tabular hasil kembalian dari pembacaan perintah <code>SELECT</code>.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="slide-footer">
+            <span>Abstraksi JDBC memisahkan kode Java dari ketergantungan tipe vendor DB tertentu</span>
+            <span>Slide 3</span>
+        </div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-header">
+            <div class="badge">BAB 3: Siklus Hidup Transaksi</div>
+            <h1>⚙️ Arsitektur & Alur Kerja Standard JDBC</h1>
+        </div>
+        <div class="slide-body">
+            <p>Setiap interaksi data dengan database melalui JDBC wajib mengikuti urutan siklus hidup (*lifecycle*) terstruktur berikut:</p>
+            
+            <div class="diagram-box">
+                <div class="mermaid">
+                    flowchart LR
+                        A[1. Load Driver] --> B[2. Buka Connection]
+                        B --> C[3. Create Statement]
+                        C --> D[4. Execute Query]
+                        D --> E[5. Fetch ResultSet]
+                        E --> F[6. Close Resource]
+                </div>
+            </div>
+
+            <div class="grid-2" style="font-size: 0.9rem; margin-top: 0.5rem;">
+                <div>
+                    <ul>
+                        <li><strong>1. Load Driver:</strong> Menginisialisasi kelas driver database ke memori agar siap digunakan oleh <code>DriverManager</code>.</li>
+                        <li><strong>2. Buka Connection:</strong> Membuat jembatan koneksi fisik lewat port jaringan tertentu menggunakan kredensial URL, user, dan password.</li>
+                        <li><strong>3. Create Statement:</strong> Membuat objek perintah SQL, baik yang bersifat statis maupun dinamis (*prepared*).</li>
+                    </ul>
+                </div>
+                <div>
+                    <ul>
+                        <li><strong>4. Execute Query:</strong> Mengirimkan instruksi ke DB. Menggunakan <code>executeUpdate()</code> untuk modifikasi data, atau <code>executeQuery()</code> khusus pembacaan.</li>
+                        <li><strong>5. Fetch ResultSet:</strong> Melakukan iterasi membaca baris data hasil seleksi dari database.</li>
+                        <li><strong>6. Close Resource:</strong> Menutup semua gerbang objek koneksi untuk mencegah kebocoran memori (*memory leak*).</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="slide-footer">
+            <span>Rule Emas: Resource yang dibuka di langkah awal wajib ditutup di langkah akhir!</span>
+            <span>Slide 4</span>
+        </div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-header">
+            <div class="badge">BAB 4: Implementasi Dasar</div>
+            <h1>🔌 Membuat Koneksi Database via Java</h1>
+        </div>
+        <div class="slide-body">
+            <p><strong>Spesifikasi Target:</strong> Nama Database: <code>dbkampus</code> | Struktur Tabel <code>mahasiswa</code>:</p>
+            <table style="margin: 0; font-size: 0.8rem;">
+                <thead><tr><th>Nama Kolom</th><th>Tipe Data</th><th>Atribut Aturan</th></tr></thead>
+                <tbody>
+                    <tr><td>id</td><td>INT</td><td>PRIMARY KEY, AUTO_INCREMENT</td></tr>
+                    <tr><td>nama / nim / jurusan</td><td>VARCHAR(100) / VARCHAR(20) / VARCHAR(50)</td><td>NOT NULL</td></tr>
+                </tbody>
+            </table>
+
+            <pre><code>import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+
+public class KoneksiDemo {
+    public static void main(String[] args) {
+        String url = "jdbc:mysql://localhost:3306/dbkampus";
+        String user = "root";
+        String password = "";
+
+        // Teknik Try-With-Resources: Otomatis menutup koneksi saat blok selesai
+        try (Connection conn = DriverManager.getConnection(url, user, password)) {
+            if (conn != null) {
+                System.out.println("✅ Koneksi berhasil terhubung ke MySQL Server!");
+            }
+        } catch (SQLException e) {
+            System.err.println("❌ Terjadi kegagalan koneksi: " + e.getMessage());
+        }
+    }
+}</code></pre>
+            <div class="note" style="padding: 0.5rem 1rem; font-size: 0.9rem;">
+                💡 <strong>Catatan Penting:</strong> Sejak spesifikasi JDBC versi 4.0+, pemanggilan eksplisit perintah lama seperti <code>Class.forName()</code> untuk memuat driver sudah tidak diwajibkan selama file JAR driver berada dalam *classpath* proyek.
+            </div>
+        </div>
+        <div class="slide-footer">
+            <span>Sintaks Try-With-Resources menjamin terhindar dari kendala koneksi menggantung</span>
+            <span>Slide 5</span>
+        </div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-header">
+            <div class="badge">BAB 5a: Operasi Menulis & Membaca Data</div>
+            <h1>📝 Operasi CRUD – INSERT & SELECT</h1>
+        </div>
+        <div class="slide-body">
+            <div class="grid-2">
+                <div>
+                    <h3>➕ Operasi INSERT (Create)</h3>
+                    <p style="font-size: 0.85rem; margin-bottom: 0.2rem;">Menggunakan tanda tanya <code>?</code> sebagai penampung parameter yang aman.</p>
+                    <pre><code>String sql = "INSERT INTO mahasiswa (nama, nim, jurusan) VALUES (?, ?, ?)";
+try (PreparedStatement ps = conn.prepareStatement(sql)) {
+    ps.setString(1, "Rian Sukarna");
+    ps.setString(2, "202601050");
+    ps.setString(3, "Informatika");
+    
+    int rowsAffected = ps.executeUpdate();
+    System.out.println(rowsAffected + " data berhasil disimpan.");
+}</code></pre>
+                </div>
+                <div>
+                    <h3>🔍 Operasi SELECT (Read)</h3>
+                    <p style="font-size: 0.85rem; margin-bottom: 0.2rem;">Menggunakan objek penampung <code>ResultSet</code> untuk membaca sekumpulan data tabel.</p>
+                    <pre><code>String sql = "SELECT * FROM mahasiswa";
+try (Statement st = conn.createStatement(); 
+     ResultSet rs = st.executeQuery(sql)) {
+     
+    while (rs.next()) {
+        int id = rs.getInt("id");
+        String nama = rs.getString("nama");
+        String nim = rs.getString("nim");
+        System.out.println(id + " | " + nama + " | " + nim);
+    }
+}</code></pre>
+                </div>
+            </div>
+            <div class="note" style="padding: 0.5rem 1rem; font-size: 0.9rem;">
+                📌 <strong>Aturan Iterasi:</strong> Posisi pointer awal <code>ResultSet</code> berada tepat sebelum baris pertama data. Pemanggilan fungsi <code>rs.next()</code> akan menggeser pointer satu baris ke bawah sekaligus mengembalikan nilai Boolean <code>false</code> jika baris berikutnya kosong.
+            </div>
+        </div>
+        <div class="slide-footer">
+            <span>Gunakan executeUpdate() untuk mutasi data, dan executeQuery() khusus ekstraksi data</span>
+            <span>Slide 6</span>
+        </div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-header">
+            <div class="badge">BAB 5b: Operasi Mengubah & Menghapus Data</div>
+            <h1>📝 Operasi CRUD – UPDATE & DELETE</h1>
+        </div>
+        <div class="slide-body">
+            <div class="grid-2">
+                <div>
+                    <h3>✏️ Operasi UPDATE (Ubah Data)</h3>
+                    <p style="font-size: 0.85rem; margin-bottom: 0.2rem;">Memperbarui isi kolom berdasarkan kriteria pengenal unik.</p>
+                    <pre><code>String sql = "UPDATE mahasiswa SET jurusan = ? WHERE id = ?";
+try (PreparedStatement ps = conn.prepareStatement(sql)) {
+    ps.setString(1, "Sistem Informasi");
+    ps.setInt(2, 1);
+    
+    int rowsUpdated = ps.executeUpdate();
+    System.out.println(rowsUpdated + " data berhasil diubah.");
+}</code></pre>
+                </div>
+                <div>
+                    <h3>❌ Operasi DELETE (Hapus Data)</h3>
+                    <p style="font-size: 0.85rem; margin-bottom: 0.2rem;">Menghapus baris rekaman data secara permanen dari tabel.</p>
+                    <pre><code>String sql = "DELETE FROM mahasiswa WHERE id = ?";
+try (PreparedStatement ps = conn.prepareStatement(sql)) {
+    ps.setInt(1, 3);
+    
+    int rowsDeleted = ps.executeUpdate();
+    System.out.println(rowsDeleted + " data dihapus.");
+}</code></pre>
+                </div>
+            </div>
+            <div class="analogi" style="margin-top: 0.5rem; padding: 0.6rem 1rem;">
+                ⚠️ <strong>Peringatan Fatal Kegagalan Logika SQL:</strong><br>
+                Selalu pastikan klausa kondisional <code>WHERE</code> disertakan pada perintah <code>UPDATE</code> dan <code>DELETE</code>. Absennya klausa <code>WHERE</code> akan menyebabkan seluruh baris data pada tabel terhapus atau terubah secara tidak sengaja.
+            </div>
+        </div>
+        <div class="slide-footer">
+            <span>Fungsi executeUpdate() mengembalikan nilai integer berupa jumlah baris data yang terpengaruh</span>
+            <span>Slide 7</span>
+        </div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-header">
+            <div class="badge">BAB 6: Keamanan Celah Siber</div>
+            <h1>🛡️ PreparedStatement vs Statement</h1>
+        </div>
+        <div class="slide-body">
+            <div class="grid-2">
+                <div>
+                    <h3>⚠️ Celah Kerentanan SQL Injection</h3>
+                    <p style="font-size: 0.85rem;">Menggabungkan input string secara langsung (*string concatenation*):</p>
+                    <pre style="background: #3a1a1a;"><code>String inputId = "3 OR '1'='1'";
+String sql = "SELECT * FROM user WHERE id = " + inputId;
+// Hasil Kompilasi Query Akhir:
+// SELECT * FROM user WHERE id = 3 OR '1'='1'</code></pre>
+                    <p style="font-size: 0.85rem; color: #c44536;">💥 <strong>Dampak Bahaya:</strong> Validasi logika jebol, penyerang siber bisa menguras seluruh isi database tanpa izin.</p>
+                </div>
+                <div>
+                    <h3>✅ Mekanisme Parameterized Binding</h3>
+                    <p style="font-size: 0.85rem;">Menggunakan placeholder <code>?</code> terproteksi otomatis:</p>
+                    <pre style="background: #1a3a24;"><code>String sql = "SELECT * FROM user WHERE id = ?";
+PreparedStatement ps = conn.prepareStatement(sql);
+ps.setString(1, inputId); 
+// Input otomatis di-escape sebagai teks murni</code></pre>
+                    <p style="font-size: 0.85rem; color: #10b981;">✨ <strong>Keunggulan:</strong> Struktur query telah di-*compile* terlebih dahulu di awal oleh database, sehingga input berbahaya tidak akan dianggap sebagai perintah baru.</p>
+                </div>
+            </div>
+
+            <table style="margin-top: 0.5rem;">
+                <thead>
+                    <tr>
+                        <th>Aspek Perbandingan</th>
+                        <th>Objek Kelas Statement Biasa</th>
+                        <th>Objek Kelas PreparedStatement</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Ketahanan SQL Injection</strong></td>
+                        <td style="color:red; font-weight:bold;">Sangat Rentan / Bahaya</td>
+                        <td style="color:green; font-weight:bold;">Sangat Aman (Terproteksi)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Performa Eksekusi Berulang</strong></td>
+                        <td>Lambat (Query harus di-parse ulang tiap kali jalan)</td>
+                        <td>Cepat (*Pre-compiled* & efisien untuk pengolahan batch)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Kerapian Struktur Kode</strong></td>
+                        <td>Rumit, penuh tanda petik satu-dua bersilangan</td>
+                        <td>Sangat rapi menggunakan penanda urutan index parameterized</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="slide-footer">
+            <span>Standar Industri: Selalu gunakan PreparedStatement untuk menerima input pengguna</span>
+            <span>Slide 8</span>
+        </div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-header">
+            <div class="badge">BAB 7: Sinkronisasi Paradigma Objek Relasional</div>
+            <h1>🧩 Menghubungkan Konsep JDBC dengan Pola OOP</h1>
+        </div>
+        <div class="slide-body">
+            <p>Dunia OOP berpikir dalam bentuk **Objek & Referensi**, sedangkan database berpikir dalam bentuk **Baris & Kolom Tabel**. Menghubungkan keduanya membutuhkan pemisahan peran yang tegas.</p>
+            
+            <div class="grid-2">
+                <div>
+                    <h3>1. Class Model / Entity (Representasi Objek)</h3>
+                    <p style="font-size: 0.85rem;">Menerapkan prinsip Enkapsulasi penuh tanpa ada kode SQL.</p>
+                    <pre style="padding: 0.5rem; font-size: 0.75rem;"><code>public class Mahasiswa {
+    private int id;
+    private String nama, nim, jurusan;
+
+    public Mahasiswa(String nama, String nim, String jurusan) {
+        this.nama = nama; this.nim = nim; this.jurusan = jurusan;
+    }
+    // Sediakan standard Getter, Setter, dan Constructor...
+}</code></pre>
+                </div>
+                <div>
+                    <h3>2. Interface Abstraksi Akses Data</h3>
+                    <p style="font-size: 0.85rem;">Kontrak baku blueprint fungsi tanpa memedulikan detail cara simpan.</p>
+                    <pre style="padding: 0.5rem; font-size: 0.75rem;"><code>import java.util.List;
+
+public interface MahasiswaDAO {
+    void insert(Mahasiswa m);
+    List&lt;Mahasiswa&gt; findAll();
+    void update(Mahasiswa m);
+    void delete(int id);
+}</code></pre>
+                </div>
+            </div>
+
+            <div class="diagram-box" style="padding: 0.4rem; margin-top: 0.2rem;">
+                <div class="mermaid" style="height: 150px;">
+                    classDiagram
+                        class Mahasiswa { -int id\n-String nama\n+getNama()\n+setNama() }
+                        class MahasiswaDAO { &lt;&lt;interface&gt;&gt;\n+insert(Mahasiswa)\n+findAll() List }
+                        class MahasiswaDAOImpl { -Connection conn\n+insert(Mahasiswa)\n+findAll() List }
+                        MahasiswaDAOImpl ..|> MahasiswaDAO : Implementasi
+                        MahasiswaDAOImpl --> Mahasiswa : Memetakan Objek
+                </div>
+            </div>
+        </div>
+        <div class="slide-footer">
+            <span>Pemisahan ini mempermudah proses Unit Testing dan perbaikan komponen aplikasi</span>
+            <span>Slide 9</span>
+        </div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-header">
+            <div class="badge">BAB 8: Arsitektur Bersih Berbasis SOLID</div>
+            <h1>🏗️ Penerapan Pola DAO (Data Access Object)</h1>
+        </div>
+        <div class="slide-body">
+            <div class="grid-2">
+                <div style="background: #fff0f0; padding: 0.8rem; border-radius: 12px; border-left: 5px solid red;">
+                    <h3>❌ Desain Antipattern (Buruk)</h3>
+                    <p style="font-size: 0.85rem; margin-bottom: 0.3rem;">Mencampuradukkan logika bisnis dengan sintaks SQL di satu tempat:</p>
+                    <pre style="font-size: 0.7rem; padding: 0.4rem;"><code>public class Mahasiswa {
+    private String nama;
+    // Pelanggaran Berat Aturan SRP!
+    public void simpanKeMySQL() {
+        String query = "INSERT INTO mahasiswa...";
+        // Kode JDBC tercampur di entitas objek
+    }
+}</code></pre>
+                </div>
+                <div style="background: #f0fff0; padding: 0.8rem; border-radius: 12px; border-left: 5px solid green;">
+                    <h3>✅ Desain Sesuai Standar DAO (Baik)</h3>
+                    <p style="font-size: 0.85rem; margin-bottom: 0.3rem;">Entitas murni menampung data, urusan SQL diserahkan ke kelas DAO khusus:</p>
+                    <pre style="font-size: 0.7rem; padding: 0.4rem;"><code>// Service berinteraksi lewat abstraksi interface
+public class MahasiswaService {
+    private MahasiswaDAO dao; 
+    
+    public MahasiswaService(MahasiswaDAO dao) {
+        this.dao = dao; // Loose Coupling (DIP Terpenuhi)
+    }
+}</code></pre>
+                </div>
+            </div>
+
+            <h3>💡 Korelasi Kuat Pola Desain dengan Prinsip SOLID:</h3>
+            <ul>
+                <li><strong>Single Responsibility Principle (SRP):</strong> Class <code>Mahasiswa</code> hanya bertanggung jawab memodelkan entitas data mahasiswa. Sedangkan urusan mekanis CRUD ke database SQL menjadi tanggung jawab tunggal milik <code>MahasiswaDAOImpl</code>.</li>
+                <li><strong>Dependency Inversion Principle (DIP):</strong> Komponen tingkat atas (*High-level service*) tidak boleh bergantung langsung secara kaku pada kelas implementasi database internal. Komponen harus bergantung pada abstraksi tingkatan `Interface` DAO.</li>
+            </ul>
+        </div>
+        <div class="slide-footer">
+            <span>Dengan DAO, migrasi dari MySQL ke PostgreSQL cukup mengganti implementasi tanpa menyentuh entitas</span>
+            <span>Slide 10</span>
+        </div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-header">
+            <div class="badge">BAB 9: Mini Project – Bagian 1</div>
+            <h1>🎓 Desain Sistem Manajemen Mahasiswa Berbasis OOP</h1>
+        </div>
+        <div class="slide-body">
+            <p><strong>Arsitektur Sistem:</strong> Aplikasi Konsol Interaktif yang mengadopsi pemisahan modular arsitektur n-tier.</p>
+            
+            <div class="grid-2" style="align-items: center;">
+                <div class="diagram-box">
+                    <div class="mermaid">
+                        flowchart TD
+                            UI[MainApp Console UI] --> Service[MahasiswaService]
+                            Service --> Interface[Interface MahasiswaDAO]
+                            Interface --> Impl[MahasiswaDAOImpl JDBC]
+                            Impl --> DB[(MySQL Server)]
+                    </div>
+                </div>
+                <div>
+                    <h3>🗂️ Standardisasi Struktur Folder Proyek (Package):</h3>
+                    <pre style="font-size: 0.8rem; line-height: 1.3; padding: 0.6rem;">
+src/
+ ├── config/
+ │    └── DatabaseConfig.java   <-- Manajer Siklus Koneksi
+ ├── entity/
+ │    └── Mahasiswa.java        <-- Plain Old Java Object (POJO)
+ ├── dao/
+ │    ├── MahasiswaDAO.java     <-- Interface Abstraksi Kontrak
+ │    └── MahasiswaDAOImpl.java <-- Implementasi Query JDBC
+ ├── service/
+ │    └── MahasiswaService.java <-- Alur Validasi Logika Bisnis
+ └── MainApp.java               <-- Titik Awal Aplikasi UI</pre>
+                </div>
+            </div>
+            <div class="note" style="padding: 0.5rem 1rem; font-size: 0.9rem; margin-top: 0.2rem;">
+                📌 <strong>Prinsip Kerja:</strong> Kelas <code>MainApp</code> hanya bertugas membaca ketikan menu dari keyboard pengguna dan menampilkan teks di layar komputer. Logika penyimpanan data sepenuhnya didelegasikan ke layer-layer di bawahnya secara beranting.
+            </div>
+        </div>
+        <div class="slide-footer">
+            <span>Struktur folder yang rapi memisahkan perhatian fungsional tiap komponen (*Separation of Concerns*)</span>
+            <span>Slide 11</span>
+        </div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-header">
+            <div class="badge">BAB 9: Mini Project – Bagian 2</div>
+            <h1>🎓 Bedah Kode Komponen Implementasi DAO</h1>
+        </div>
+        <div class="slide-body">
+            <p>Berikut adalah cuplikan potongan kode inti implementasi JDBC murni di dalam tubuh kelas <code>MahasiswaDAOImpl</code>:</p>
+            
+            <pre style="font-size: 0.75rem; line-height: 1.35; padding: 0.6rem 1rem;"><code>@Override
+public void insert(Mahasiswa m) {
+    String sql = "INSERT INTO mahasiswa (nama, nim, jurusan) VALUES (?, ?, ?)";
+    // Otomatis membuka dan menutup objek Connection & PreparedStatement
+    try (Connection conn = DatabaseConfig.getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+        
+        ps.setString(1, m.getNama());
+        ps.setString(2, m.getNim());
+        ps.setString(3, m.getJurusan());
+        ps.executeUpdate();
+    } catch (SQLException e) {
+        throw new RuntimeException("Gagal melakukan operasi insert data mahasiswa", e);
+    }
+}
+
+@Override
+public List&lt;Mahasiswa&gt; findAll() {
+    List&lt;Mahasiswa&gt; list = new ArrayList&lt;&gt;();
+    String sql = "SELECT * FROM mahasiswa";
+    try (Connection conn = DatabaseConfig.getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql);
+         ResultSet rs = ps.executeQuery()) {
+        
+        while (rs.next()) {
+            Mahasiswa m = new Mahasiswa(rs.getString("nama"), rs.getString("nim"), rs.getString("jurusan"));
+            m.setId(rs.getInt("id"));
+            list.add(m);
+        }
+    } catch (SQLException e) {
+        throw new RuntimeException("Gagal memuat daftar seluruh data mahasiswa", e);
+    }
+    return list;
+}</code></pre>
+        </div>
+        <div class="slide-footer">
+            <span>Runtime Exception dilemparkan ke atas agar layer UI dapat menangkap dan memunculkan pesan kesalahan</span>
+            <span>Slide 12</span>
+        </div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-header">
+            <div class="badge">BAB 10: Standar Rekayasa Perangkat Lunak</div>
+            <h1>🏆 Panduan Best Practices Pengembangan JDBC</h1>
+        </div>
+        <div class="slide-body" style="gap: 1rem;">
+            <p>Untuk menghasilkan aplikasi berskala industri yang tangguh, aman, dan efisien, pastikan Anda selalu mematuhi standardisasi aturan penulisan kode berikut:</p>
+            
+            <div class="grid-2">
+                <div style="background: #fafcfd; padding: 0.8rem; border-radius: 12px; border: 1px solid var(--border-color);">
+                    <h3 style="color: var(--secondary);">🔒 Aspek Keamanan & Kinerja</h3>
+                    <ul style="font-size: 0.9rem; padding-left: 1.2rem;">
+                        <li><strong>Gunakan PreparedStatement Selalu:</strong> Jangan pernah berkompromi menggunakan Statement biasa untuk nilai variabel dinamis yang berasal dari luar.</li>
+                        <li><strong>Terapkan Try-With-Resources:</strong> Menghilangkan risiko kelalaian lupa menutup resource yang bisa berujung pada hang-nya server basis data.</li>
+                        <li><strong>Batasi Ambil Data:</strong> Hindari kebiasaan buruk <code>SELECT *</code> jika tabel memiliki puluhan kolom; sebutkan nama kolom yang dibutuhkan secara spesifik.</li>
+                    </ul>
+                </div>
+                <div style="background: #fafcfd; padding: 0.8rem; border-radius: 12px; border: 1px solid var(--border-color);">
+                    <h3 style="color: var(--secondary);">🏗️ Aspek Manajemen Struktur</h3>
+                    <ul style="font-size: 0.9rem; padding-left: 1.2rem;">
+                        <li><strong>Sentralisasi Konfigurasi:</strong> Pisahkan parameter teks URL, User, dan Password ke dalam file eksternal <code>.properties</code> atau <code>.env</code>.</li>
+                        <li><strong>Gunakan Connection Pooling:</strong> Pada aplikasi web berskala besar, gunakan pustaka manajer kolam koneksi siap pakai seperti HikariCP demi efisiensi resource.</li>
+                        <li><strong>Isolasi Layer SQL:</strong> Jangan biarkan ada satu pun kata kunci SQL (seperti INSERT, SELECT) lolos bocor ke dalam kelas Model UI.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="note" style="margin: 0; padding: 0.6rem 1rem; font-size: 0.9rem;">
+                👉 <strong>Insight Penting:</strong> Pemisahan konfigurasi kredensial dari source code merupakan syarat mutlak agar kode aman saat diunggah ke repositori publik seperti GitHub.
+            </div>
+        </div>
+        <div class="slide-footer">
+            <span>Kualitas kebersihan kode menentukan tingkat kemudahan pemeliharaan aplikasi di masa mendatang</span>
+            <span>Slide 13</span>
+        </div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-header">
+            <div class="badge">BAB 11: Deteksi Masalah & Solusi Kerusakan</div>
+            <h1>⚠️ Analisis Kesalahan Umum Mahasiswa & Solusinya</h1>
+        </div>
+        <div class="slide-body">
+            <p>Berikut adalah inventarisasi katalog kesalahan teknis yang paling sering dialami mahasiswa saat sesi praktikum pemrograman JDBC:</p>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 25%;">Identitas Galat (Error)</th>
+                        <th style="width: 40%;">Akar Penyebab Utama Kelalaian</th>
+                        <th style="width: 35%;">Solusi Tepat Penyembuhan</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>ClassNotFoundException</code></td>
+                        <td>Pustaka file JAR Driver MySQL Connector belum terdaftar di dalam Classpath/Dependency proyek.</td>
+                        <td>Tambahkan dependensi MySQL pada file <code>pom.xml</code> (Maven) atau masukkan JAR ke Project Libraries.</td>
+                    </tr>
+                    <tr>
+                        <td><code>SQLException: Access denied</code></td>
+                        <td>Kombinasi isian username atau password database salah, atau server MySQL belum aktif dijalankan.</td>
+                        <td>Periksa panel XAMPP Control, pastikan servis MySQL dalam status 'Running' dan cek string kredensial.</td>
+                    </tr>
+                    <tr>
+                        <td><code>NullPointerException</code></td>
+                        <td>Mencoba memanggil fungsi pembacaan data kolom sebelum memanggil instruksi wajib pergeseran pointer <code>rs.next()</code>.</td>
+                        <td>Bungkus proses pembacaan objek di dalam struktur perulangan loop <code>while(rs.next()){...}</code>.</td>
+                    </tr>
+                    <tr>
+                        <td><code>Koneksi Habis / Timeout</code></td>
+                        <td>Terlalu sering membuka gerbang koneksi di dalam perulangan namun lupa mengeksekusi perintah <code>close()</code>.</td>
+                        <td>Migrasikan arsitektur penulisan blok kode mengikuti cetak biru pola *Try-With-Resources*.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="slide-footer">
+            <span>Membaca pesan error log secara teliti adalah keahlian wajib seorang Software Engineer handal</span>
+            <span>Slide 14</span>
+        </div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-header">
+            <div class="badge">BAB 12: Konklusi Inti Materi</div>
+            <h1>📋 Ringkasan Peta Konsep & Pemetaan Fungsi</h1>
+        </div>
+        <div class="slide-body">
+            <p>Rangkuman menyeluruh relasi antar-komponen dalam ekosistem integrasi Java Database Connectivity dan Pemrograman Berbasis Objek:</p>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 25%;">Nama Komponen</th>
+                        <th>Peran & Tanggung Jawab dalam Arsitektur Sistem Integrasi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Connection</strong></td>
+                        <td>Jalur pipa komunikasi dua arah resmi yang menjembatani aplikasi Java dengan server basis data tujuan.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>PreparedStatement</strong></td>
+                        <td>Mesin pengeksekusi instruksi query SQL pintar yang mengadopsi prapemrosesan kompilasi demi keamanan siber.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>ResultSet</strong></td>
+                        <td>Wadah virtual penyimpanan data tabular sementara hasil ekstraksi yang dapat dijelajahi baris demi baris.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>DAO Pattern</strong></td>
+                        <td>Desain pola arsitektur yang mengisolasi total detail urusan mekanis SQL agar terpisah dari domain bisnis utama.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Entity Class (POJO)</strong></td>
+                        <td>Representasi pemodelan objek dunia nyata yang diwujudkan dalam bentuk variabel internal, getter, dan setter.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="note" style="margin-top: 0.5rem; padding: 0.8rem 1.2rem;">
+                🔗 <strong>Kesimpulan Akhir Hubungan OOP & JDBC:</strong> <br>
+                Kolaborasi yang harmonis antara JDBC dan prinsip SOLID melahirkan sistem aplikasi yang kokoh (*robust*), mudah diuji (*testable*), dan adaptif terhadap segala bentuk perubahan infrastruktur teknologi di masa depan.
+            </div>
+        </div>
+        <div class="slide-footer">
+            <span>Pahami Polanya, Kuasai Arsitekturnya, Hindari Hafalan Mati Perintah Kode!</span>
+            <span>Slide 15</span>
+        </div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-header">
+            <div class="badge">UJI KOMPETENSI MANDIRI</div>
+            <h1>📝 Lembar Evaluasi Mahasiswa – Bagian A & B</h1>
+        </div>
+        <div class="slide-body" style="gap: 0.5rem; overflow-y: auto;">
+            <div class="grid-2" style="font-size: 0.8rem; gap: 1rem;">
+                <div>
+                    <h3 style="border-bottom: 1px solid #ccc; padding-bottom: 2px;">A. Pilihan Ganda (Sampel Acak Evaluasi)</h3>
+                    <ol style="padding-left: 1.1rem; display: flex; flex-direction: column; gap: 0.2rem;">
+                        <li>Di manakah posisi letak file JAR JDBC Driver yang tepat harus diletakkan? <br>
+                            a) JVM Internal &nbsp; <strong>b) Project Classpath Dependencies</strong> &nbsp; c) System OS Kernel</li>
+                        <li>Method manakah yang paling tepat digunakan untuk menjalankan perintah SQL `DELETE`?<br>
+                            a) executeQuery() &nbsp; <strong>b) executeUpdate()</strong> &nbsp; c) executeRead()</li>
+                        <li>Mekanisme apa yang ditawarkan Java untuk menjamin penutupan otomatis resource JDBC?<br>
+                            <strong>a) Try-With-Resources</strong> &nbsp; b) Throws Exception &nbsp; c) Garbage Collection</li>
+                        <li>Prinsip SOLID manakah yang mendasari pemisahan kelas Entity dan kelas komponen DAO?<br>
+                            a) Liskov Substitution &nbsp; <strong>b) Single Responsibility</strong> &nbsp; c) Interface Segregation</li>
+                        <li>Apakah akibat fatal utama jika aplikasi mengalami kendala kebocoran koneksi (*Connection Leak*)?<br>
+                            a) Kehilangan Data &nbsp; b) Error Kompilasi Syntax &nbsp; <strong>c) Hang Server / Habisnya Resource Pool</strong></li>
+                    </ol>
+                </div>
+                <div>
+                    <h3 style="border-bottom: 1px solid #ccc; padding-bottom: 2px;">B. Soal Analisis Studi Kasus Kode Program</h3>
+                    <p style="font-size: 0.8rem; margin-bottom: 0.2rem;"><strong>Pertanyaan:</strong> Teliti bait kode di bawah. Identifikasi potensi bahaya kerusakan fatal apa yang mengancam keamanan aplikasi tersebut?</p>
+                    <pre style="font-size: 0.7rem; padding: 0.4rem; margin: 0.2rem 0;"><code>// Skenario pencarian data akun user internal aplikasi
+String inputUser = request.getParameter("searchId");
+Statement stmt = connection.createStatement();
+ResultSet rs = stmt.executeQuery("SELECT * FROM mhs WHERE id = " + inputUser);</code></pre>
+                    <p style="font-size: 0.8rem; margin-top: 0.3rem;"><strong>Kunci Analisis Jawaban Teknikal:</strong><br>
+                    Kode di atas mengandung cacat arsitektur fatal berupa celah kerentanan keamanan **SQL Injection**. Penggabungan string input secara mentah menggunakan operator tambah <code>+</code> memungkinkan peretas menyisipkan manipulasi sintaks logika logika seperti <code>"1 OR 1=1"</code> yang akan memaksa database membocorkan seluruh baris isi privasi tabel. <br>
+                    <strong>Solusi Perbaikan:</strong> Wajib segera dirombak menggunakan objek kelas <code>PreparedStatement</code> dan melakukan teknik binding argumen parameter <code>ps.setInt(1, Integer.parseInt(inputUser))</code>.
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="slide-footer">
+            <span>Evaluasi mengukur tingkat kedalaman pemahaman kognitif serta analisis kasus mahasiswa</span>
+            <span>Slide 16</span>
+        </div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-header">
+            <div class="badge">PROJECT AKHIR SEMESTER (UAS)</div>
+            <h1>💻 Spesifikasi Project Mandiri: Sistem Inventaris Barang</h1>
+        </div>
+        <div class="slide-body">
+            <div class="grid-2" style="font-size: 0.85rem; gap: 1rem;">
+                <div>
+                    <h3>📋 Kebutuhan Fungsional Sistem (Requirements)</h3>
+                    <ul>
+                        <li>Mampu mengolah manajemen data komoditas barang (Tambah, Lihat, Ubah, Hapus).</li>
+                        <li>Wajib menerapkan Pola Desain **DAO Pattern** secara penuh dan konsisten.</li>
+                        <li>Validasi Aturan Bisnis: Stok barang tidak boleh bernilai minus, dan kode barang wajib bersifat unik.</li>
+                        <li>Arsitektur kode harus bersih dan terisolasi dari hardcode kredensial database.</li>
+                    </ul>
+
+                    <h3 style="margin-top: 0.5rem;">🗂️ Standar Kerangka Blueprint Package</h3>
+                    <pre style="font-size: 0.7rem; padding: 0.4rem; margin: 0;">
+src/
+ ├── id.ac.kampus.inventaris.entity/Barang.java
+ ├── id.ac.kampus.inventaris.dao/BarangDAO.java (Interface)
+ ├── id.ac.kampus.inventaris.dao.impl/BarangDAOImpl.java
+ └── id.ac.kampus.inventaris.main/Application.java</pre>
+                </div>
+                <div>
+                    <h3>📊 Rubrik Penilaian Proyek Praktikum (Skala Maks 100)</h3>
+                    <table style="font-size: 0.75rem; margin: 0;">
+                        <thead>
+                            <tr>
+                                <th>Bobot</th>
+                                <th>Kriteria Indikator Penilaian Kualitatif</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="text-align: center; font-weight: bold;">30%</td>
+                                <td><strong>Kebenaran Fungsional:</strong> Seluruh fitur operasi CRUD berjalan normal tanpa memicu crash program/error.</td>
+                            </tr>
+                            <tr>
+                                <td style="text-align: center; font-weight: bold;">30%</td>
+                                <td><strong>Arsitektur Kode:</strong> Pemisahan yang disiplin antara kelas Entity, Interface DAO, dan kode driver JDBC.</td>
+                            </tr>
+                            <tr>
+                                <td style="text-align: center; font-weight: bold;">20%</td>
+                                <td><strong>Aspek Keamanan:</strong> Penggunaan PreparedStatement secara mutlak di seluruh baris query instruksi database.</td>
+                            </tr>
+                            <tr>
+                                <td style="text-align: center; font-weight: bold;">20%</td>
+                                <td><strong>Kerapian & Kredensial:</strong> Penggunaan Try-With-Resources dan tidak ada hardcode kredensial di kelas DAO.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="note" style="margin-top: 0.3rem; padding: 0.5rem 1rem; font-size: 0.85rem; text-align: center;">
+                🚀 <strong>Selamat Berkreasi & Selamat Belajar!</strong> Wujudkan ilmu teori ke dalam produk aplikasi nyata dengan kode yang bersih dan terstruktur rapi.
+            </div>
+        </div>
+        <div class="slide-footer">
+            <span>Penerapan aturan rekayasa perangkat lunak yang disiplin melahirkan developer yang berkualitas</span>
+            <span>Slide 17</span>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // Inisialisasi rendering engine diagram Mermaid JS dengan tema netral yang bersih
+    mermaid.initialize({ 
+        startOnLoad: true, 
+        theme: 'neutral', 
+        securityLevel: 'loose',
+        flowchart: { useWidth: 100% }
+    });
+</script>
+</body>
+</html>

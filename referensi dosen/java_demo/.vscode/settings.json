@@ -1,0 +1,11 @@
+{
+    "java.project.referencedLibraries": [
+        "referensi dosen/java_demo/lib/mysql-connector-j-8.0.33.jar"
+    ],
+    "java.project.sourcePaths": [
+        "src"
+    ],
+    "files.exclude": {
+        "referensi dosen/": true
+    }
+}
